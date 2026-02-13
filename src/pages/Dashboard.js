@@ -109,7 +109,7 @@ function Dashboard() {
     const token = localStorage.getItem("token");
 
     const res = await axios.get(
-      "http://127.0.0.1:8000/appointments",
+      "https://your-backend-url.onrender.com/appointments",
       {
         headers: { Authorization: `Bearer ${token}` }
       }
@@ -122,7 +122,7 @@ function Dashboard() {
     const token = localStorage.getItem("token");
 
     await axios.post(
-      "http://127.0.0.1:8000/appointments",
+      "https://your-backend-url.onrender.com/appointments",
       {
         title: appointmentTitle,
         appointment_time: appointmentTime,
@@ -143,7 +143,7 @@ function Dashboard() {
     const token = localStorage.getItem("token");
 
     const res = await axios.post(
-      "http://127.0.0.1:8000/chat",
+      "https://your-backend-url.onrender.com/chat",
       { message },
       { headers: { Authorization: `Bearer ${token}` } }
     );
