@@ -109,7 +109,7 @@ function Dashboard() {
     const token = localStorage.getItem("token");
 
     const res = await axios.get(
-      "https://your-backend-url.onrender.com/appointments",
+      "https://healthcare-ai-backend-re4u.onrender.com/appointments",
       {
         headers: { Authorization: `Bearer ${token}` }
       }
@@ -122,7 +122,7 @@ function Dashboard() {
     const token = localStorage.getItem("token");
 
     await axios.post(
-      "https://your-backend-url.onrender.com/appointments",
+      "https://healthcare-ai-backend-re4u.onrender.com/appointments",
       {
         title: appointmentTitle,
         appointment_time: appointmentTime,
@@ -143,7 +143,7 @@ function Dashboard() {
     const token = localStorage.getItem("token");
 
     const res = await axios.post(
-      "https://your-backend-url.onrender.com/chat",
+      "https://healthcare-ai-backend-re4u.onrender.com/chat",
       { message },
       { headers: { Authorization: `Bearer ${token}` } }
     );

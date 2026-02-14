@@ -9,7 +9,7 @@ function Register() {
 
   const handleRegister = async () => {
     try {
-      await axios.post("http://127.0.0.1:8000/register", {
+      await axios.post("https://healthcare-ai-backend-re4u.onrender.com/register", {
         username,
         password,
       });
