@@ -1,70 +1,111 @@
-# Getting Started with Create React App
+AI-Powered Accessible Healthcare Assistant
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Overview
 
-## Available Scripts
+This project is a full-stack AI-powered healthcare assistant designed with accessibility, safety, and transparency in mind.
 
-In the project directory, you can run:
+It provides:
 
-### `npm start`
+- Secure user authentication
+- AI-driven NHS-based medical guidance
+- Evidence-grounded responses (RAG)
+- Emergency detection and warning system
+- Appointment reminder system with recurring support
+- Accessibility features for elderly and special needs users
+- Deployed live on Render
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Live Demo
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Frontend:  
+https://healthcare-ai-frontend-8wy7.onrender.com  
 
-### `npm test`
+Backend API Docs:  
+https://healthcare-ai-backend-re4u.onrender.com/docs  
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Features
 
-### `npm run build`
+Secure Authentication
+- JWT-based login
+- Password hashing (bcrypt)
+- Protected API routes
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+AI Healthcare Assistant
+- Groq LLM integration
+- LLM-based RAG document selection
+- NHS-grounded responses
+- Structured output format
+- Confidence scoring
+- Emergency keyword detection
+- Transparent source citation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Appointment Reminder System
+- Create appointments
+- Recurring (none / daily / weekly)
+- Popup reminder alerts
+- Medical alert sound
+- Anti-repeat alert logic
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Accessibility Support
+- Large text mode
+- High contrast mode
+- Quick-access healthcare buttons
+- Simple structured layout
 
-### `npm run eject`
+Tech Stack
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Backend
+- FastAPI
+- SQLAlchemy
+- SQLite
+- JWT (python-jose)
+- Passlib (bcrypt)
+- Groq API
+- Uvicorn
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Frontend
+- React
+- Axios
+- React Router
+- Web Audio API
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Deployment
+- Render (Backend)
+- Render Static Site (Frontend)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Architecture
 
-## Learn More
+Frontend (React SPA) communicates with a FastAPI backend via JWT-secured endpoints.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The backend integrates with Groq LLM and performs LLM-based Retrieval-Augmented Generation (RAG) using curated NHS documents.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Appointments are stored in SQLite and reminder logic runs client-side.
 
-### Code Splitting
+Security Considerations
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- No medical diagnosis
+- No prescription generation
+- Educational information only
+- Emergency warnings included
+- API keys stored securely via environment variables
 
-### Analyzing the Bundle Size
+Limitations
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- SQLite database (MVP only)
+- Free-tier hosting (may sleep)
+- Client-side reminder scheduling
+- No persistent recurring auto-rescheduling yet
 
-### Making a Progressive Web App
+Future Improvements
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- Cancel appointment feature
+- Snooze reminder
+- Professional notification modal
+- Conversation memory
+- Vector database RAG
+- PostgreSQL production DB
+- Full WCAG compliance
+- Mobile-first responsive redesign
 
-### Advanced Configuration
+License
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Educational and demonstration purposes only.
