@@ -37,6 +37,7 @@ function Dashboard() {
 
   useEffect(() => {
     audioRef.current = new Audio("/medical-alert.mp3");
+    audioRef.current.loop = true;  
 
     const unlockAudio = () => {
       audioRef.current.play().then(() => {
@@ -55,6 +56,7 @@ function Dashboard() {
   const playSound = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
+      audioRef.current.loop = true;
       audioRef.current.play().catch(() => {});
     }
   };
@@ -159,6 +161,11 @@ function Dashboard() {
   const snoozeReminder = () => {
     if (!currentReminder) return;
 
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
     const newTime = new Date();
     newTime.setMinutes(newTime.getMinutes() + 5);
 
@@ -173,7 +180,14 @@ function Dashboard() {
     setShowReminder(false);
   };
 
+
+
   const stopReminder = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
     setShowReminder(false);
   };
 
@@ -230,7 +244,8 @@ function Dashboard() {
         padding: "20px"
       }}
     >
-      <h1>Accessible Healthcare Assistant</h1>
+      <h1>HealthLink Access</h1>
+      <p>Your Accessible NHS Healthcare Companion</p>
 
       <button onClick={() => setLargeText(!largeText)}>Large Text</button>
       <button onClick={() => setHighContrast(!highContrast)}>High Contrast</button>
