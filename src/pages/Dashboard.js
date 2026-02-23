@@ -5,9 +5,9 @@ import axios from "axios";
 function Dashboard() {
   const navigate = useNavigate();
 
-  // =========================
-  // STATES
-  // =========================
+  // ========================
+  // STATE
+  // ========================
 
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
@@ -15,25 +15,29 @@ function Dashboard() {
   const [confidence, setConfidence] = useState("");
   const [isEmergency, setIsEmergency] = useState(false);
 
-  const [largeText, setLargeText] = useState(false);
-  const [highContrast, setHighContrast] = useState(false);
-
+  const [appointments, setAppointments] = useState([]);
   const [appointmentTitle, setAppointmentTitle] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");
   const [recurring, setRecurring] = useState("none");
-  const [appointments, setAppointments] = useState([]);
+
+  const [showReminder, setShowReminder] = useState(false);
+  const [currentReminder, setCurrentReminder] = useState(null);
+
+  const [largeText, setLargeText] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
 
   const alertedAppointments = useRef(new Set());
   const audioRef = useRef(null);
 
-  // =========================
-  // AUDIO INITIALIZATION
-  // =========================
+  const API = "https://healthcare-ai-backend-re4u.onrender.com";
+
+  // ========================
+  // AUDIO INIT
+  // ========================
 
   useEffect(() => {
     audioRef.current = new Audio("/medical-alert.mp3");
 
-    // Unlock audio on first click
     const unlockAudio = () => {
       audioRef.current.play().then(() => {
         audioRef.current.pause();
@@ -48,31 +52,26 @@ function Dashboard() {
     };
   }, []);
 
-  const playMedicalBeep = () => {
+  const playSound = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
-      audioRef.current.play().catch((err) => {
-        console.log("Audio blocked:", err);
-      });
+      audioRef.current.play().catch(() => {});
     }
   };
 
-  // =========================
-  // PROTECTION & LOAD
-  // =========================
+  // ========================
+  // AUTH CHECK
+  // ========================
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/");
-    } else {
-      fetchAppointments();
-    }
+    if (!token) navigate("/");
+    else fetchAppointments();
   }, [navigate]);
 
-  // =========================
+  // ========================
   // REMINDER CHECK
-  // =========================
+  // ========================
 
   const checkReminders = () => {
     const now = new Date();
@@ -86,34 +85,28 @@ function Dashboard() {
         !alertedAppointments.current.has(appt.id)
       ) {
         alertedAppointments.current.add(appt.id);
-
-        playMedicalBeep();
-        alert(`Reminder: ${appt.title} is happening now!`);
+        setCurrentReminder(appt);
+        setShowReminder(true);
+        playSound();
       }
     });
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      checkReminders();
-    }, 10000);
-
+    const interval = setInterval(checkReminders, 10000);
     return () => clearInterval(interval);
   }, [appointments]);
 
-  // =========================
-  // API FUNCTIONS
-  // =========================
+  // ========================
+  // API CALLS
+  // ========================
 
   const fetchAppointments = async () => {
     const token = localStorage.getItem("token");
 
-    const res = await axios.get(
-      "https://healthcare-ai-backend-re4u.onrender.com/appointments",
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
+    const res = await axios.get(`${API}/appointments`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
     setAppointments(res.data);
   };
@@ -122,20 +115,29 @@ function Dashboard() {
     const token = localStorage.getItem("token");
 
     await axios.post(
-      "https://healthcare-ai-backend-re4u.onrender.com/appointments",
+      `${API}/appointments`,
       {
         title: appointmentTitle,
         appointment_time: appointmentTime,
-        recurring: recurring
+        recurring
       },
       {
         headers: { Authorization: `Bearer ${token}` }
       }
     );
 
-    alert("Appointment saved!");
     setAppointmentTitle("");
     setAppointmentTime("");
+    fetchAppointments();
+  };
+
+  const deleteAppointment = async (id) => {
+    const token = localStorage.getItem("token");
+
+    await axios.delete(`${API}/appointments/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
     fetchAppointments();
   };
 
@@ -143,7 +145,7 @@ function Dashboard() {
     const token = localStorage.getItem("token");
 
     const res = await axios.post(
-      "https://healthcare-ai-backend-re4u.onrender.com/chat",
+      `${API}/chat`,
       { message },
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -154,152 +156,190 @@ function Dashboard() {
     setIsEmergency(res.data.emergency || false);
   };
 
+  const snoozeReminder = () => {
+    if (!currentReminder) return;
+
+    const newTime = new Date();
+    newTime.setMinutes(newTime.getMinutes() + 5);
+
+    setAppointments((prev) =>
+      prev.map((appt) =>
+        appt.id === currentReminder.id
+          ? { ...appt, appointment_time: newTime.toISOString() }
+          : appt
+      )
+    );
+
+    setShowReminder(false);
+  };
+
+  const stopReminder = () => {
+    setShowReminder(false);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
   };
 
-  // =========================
+  // ========================
+  // STYLES
+  // ========================
+
+  const cardStyle = {
+    backgroundColor: highContrast ? "#222" : "white",
+    padding: "20px",
+    borderRadius: "10px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+    marginBottom: "20px"
+  };
+
+  const modalOverlay = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0,0,0,0.6)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000
+  };
+
+  const modalBox = {
+    backgroundColor: "white",
+    padding: "30px",
+    borderRadius: "10px",
+    textAlign: "center",
+    width: "90%",
+    maxWidth: "350px"
+  };
+
+  // ========================
   // UI
-  // =========================
+  // ========================
 
   return (
     <div
       style={{
         fontSize: largeText ? "22px" : "16px",
-        backgroundColor: highContrast ? "#111" : "#f5f5f5",
+        backgroundColor: highContrast ? "#111" : "#eef2f7",
         color: highContrast ? "white" : "#222",
         minHeight: "100vh",
-        padding: "30px",
-        fontFamily: "Arial"
+        padding: "20px"
       }}
     >
-      <h1>Osimo Healthcare Assistant</h1>
+      <h1>Accessible Healthcare Assistant</h1>
 
-      <button onClick={() => setLargeText(!largeText)}>
-        Toggle Large Text
-      </button>
+      <button onClick={() => setLargeText(!largeText)}>Large Text</button>
+      <button onClick={() => setHighContrast(!highContrast)}>High Contrast</button>
+      <button onClick={handleLogout} style={{ marginLeft: "10px" }}>Logout</button>
 
-      <button onClick={() => setHighContrast(!highContrast)}>
-        Toggle High Contrast
-      </button>
-
-      <button onClick={handleLogout} style={{ marginLeft: "10px" }}>
-        Logout
-      </button>
-
-      <hr />
-
-      {/* QUICK ACCESS BUTTONS */}
-      <h2>Quick Healthcare Options</h2>
-
-      <div style={{ display: "grid", gap: "15px", maxWidth: "500px" }}>
-        <button onClick={() => setMessage("I want help booking a GP appointment")} style={{ padding: "15px", fontSize: "18px" }}>
-          📅 Book GP Appointment
-        </button>
-
-        <button onClick={() => setMessage("What should I do if I have chest pain?")} style={{ padding: "15px", fontSize: "18px" }}>
-          🚨 Emergency Guidance
-        </button>
-
-        <button onClick={() => setMessage("Explain high blood pressure in simple terms")} style={{ padding: "15px", fontSize: "18px" }}>
-          🩺 Understand a Condition
-        </button>
-
-        <button onClick={() => setMessage("How do I use the NHS app?")} style={{ padding: "15px", fontSize: "18px" }}>
-          📱 NHS App Help
-        </button>
+      {/* QUICK ACTIONS */}
+      <div style={cardStyle}>
+        <h2>Quick Healthcare Options</h2>
+        <button onClick={() => setMessage("I need help booking a GP appointment")} style={{ margin: "5px" }}>📅 Book GP</button>
+        <button onClick={() => setMessage("What should I do if I have chest pain?")} style={{ margin: "5px" }}>🚨 Emergency</button>
+        <button onClick={() => setMessage("Explain high blood pressure in simple terms")} style={{ margin: "5px" }}>🩺 Condition</button>
       </div>
 
-      <hr />
+      {/* CHAT */}
+      <div style={cardStyle}>
+        <h2>Ask a Question</h2>
+        <textarea
+          aria-label="Healthcare question input"
+          rows="4"
+          style={{ width: "100%" }}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+        <br /><br />
+        <button onClick={sendMessage}>Send</button>
 
-      {/* CHAT AREA */}
-      <h2>Ask a Question</h2>
+        {isEmergency && (
+          <div style={{ color: "red", fontWeight: "bold", marginTop: "10px" }}>
+            ⚠️ Emergency Warning
+          </div>
+        )}
 
-      <textarea
-        rows="4"
-        style={{ width: "100%", padding: "10px" }}
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
+        <p>{response}</p>
+        {confidence && <p><strong>Confidence:</strong> {confidence}</p>}
 
-      <br /><br />
-      <button onClick={sendMessage} style={{ padding: "10px 20px" }}>
-        Send
-      </button>
+        {sources.length > 0 && (
+          <div>
+            <h3>Sources</h3>
+            {sources.map((s, i) => (
+              <details key={i}>
+                <summary><strong>{s.title}</strong></summary>
+                <p>{s.content}</p>
+              </details>
+            ))}
+          </div>
+        )}
+      </div>
 
-      <hr />
+      {/* APPOINTMENTS */}
+      <div style={cardStyle}>
+        <h2>Appointment Reminder</h2>
 
-      {/* RESPONSE */}
-      {isEmergency && (
-        <div style={{ color: "red", fontWeight: "bold" }}>
-          ⚠️ Emergency Warning: Seek immediate medical attention.
-        </div>
-      )}
+        <input
+          type="text"
+          placeholder="Appointment Title"
+          value={appointmentTitle}
+          onChange={(e) => setAppointmentTitle(e.target.value)}
+        />
 
-      <p>{response}</p>
+        <br /><br />
 
-      {confidence && (
-        <p><strong>Confidence:</strong> {confidence}</p>
-      )}
+        <input
+          type="datetime-local"
+          value={appointmentTime}
+          onChange={(e) => setAppointmentTime(e.target.value)}
+        />
 
-      {sources.length > 0 && (
-        <div>
-          <h3>Sources</h3>
-          {sources.map((s, i) => (
-            <details key={i}>
-              <summary><strong>{s.title}</strong></summary>
-              <p>{s.content}</p>
-            </details>
+        <br /><br />
+
+        <select value={recurring} onChange={(e) => setRecurring(e.target.value)}>
+          <option value="none">No Repeat</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+        </select>
+
+        <br /><br />
+
+        <button onClick={createAppointment}>Save Appointment</button>
+
+        <ul>
+          {appointments.map((appt) => (
+            <li key={appt.id} style={{ marginBottom: "10px" }}>
+              <strong>{appt.title}</strong> —
+              {new Date(appt.appointment_time).toLocaleString()}
+              ({appt.recurring})
+              <button
+                onClick={() => deleteAppointment(appt.id)}
+                style={{ marginLeft: "10px", backgroundColor: "#d9534f", color: "white" }}
+              >
+                Cancel
+              </button>
+            </li>
           ))}
+        </ul>
+      </div>
+
+      {/* MODAL REMINDER */}
+      {showReminder && currentReminder && (
+        <div style={modalOverlay}>
+          <div style={modalBox}>
+            <h2>⏰ Appointment Reminder</h2>
+            <p><strong>{currentReminder.title}</strong></p>
+            <p>{new Date(currentReminder.appointment_time).toLocaleString()}</p>
+
+            <button onClick={snoozeReminder}>Snooze 5 min</button>
+            <button onClick={stopReminder} style={{ marginLeft: "10px" }}>Stop</button>
+          </div>
         </div>
       )}
-
-      <hr />
-
-      {/* APPOINTMENT SECTION */}
-      <h2>Appointment Reminder</h2>
-
-      <input
-        type="text"
-        placeholder="Appointment Title"
-        value={appointmentTitle}
-        onChange={(e) => setAppointmentTitle(e.target.value)}
-      />
-
-      <br /><br />
-
-      <input
-        type="datetime-local"
-        value={appointmentTime}
-        onChange={(e) => setAppointmentTime(e.target.value)}
-      />
-
-      <br /><br />
-
-      <select value={recurring} onChange={(e) => setRecurring(e.target.value)}>
-        <option value="none">No Repeat</option>
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-      </select>
-
-      <br /><br />
-
-      <button onClick={createAppointment}>
-        Save Appointment
-      </button>
-
-      <h3>Your Appointments</h3>
-
-      <ul>
-        {appointments.map((appt) => (
-          <li key={appt.id}>
-            <strong>{appt.title}</strong> —
-            {new Date(appt.appointment_time).toLocaleString()}
-            ({appt.recurring})
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
