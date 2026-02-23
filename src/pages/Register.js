@@ -9,7 +9,7 @@ function Register() {
 
   const handleRegister = async () => {
     try {
-      await axios.post("https://healthcare-ai-backend-re4u.onrender.com/register", {
+      await axios.post("https://healthlink-access-enterprise-backend.onrender.com/register", {
         username,
         password,
       });

@@ -9,7 +9,7 @@ function Login() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post("https://healthcare-ai-backend-re4u.onrender.com/login", {
+      const response = await axios.post("https://healthlink-access-enterprise-backend.onrender.com/login", {
         username,
         password,
       });

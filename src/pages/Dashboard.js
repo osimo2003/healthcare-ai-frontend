@@ -29,7 +29,7 @@ function Dashboard() {
   const alertedAppointments = useRef(new Set());
   const audioRef = useRef(null);
 
-  const API = "https://healthcare-ai-backend-re4u.onrender.com";
+  const API = "https://healthlink-access-enterprise-backend.onrender.com";
 
   // ========================
   // AUDIO INIT
